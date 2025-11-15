@@ -1,22 +1,15 @@
-name: auth-workflow.yml
+name: auth-workflow
 
 on:
   push:
     branches:
-      - 'main'
+      - main
     paths:
-      - '**.js'
+      - "**/*.js"
 
 jobs:
   test:
     runs-on: ubuntu-latest
-	env:
-	NODE_ENV: test
-	PORT: 8000
-	MONGODB_URL: mongodb://mongo:27017/user-auth
-      JWT_ACCESS_SECRET: very_secure
-      JWT_REFRESH_SECRET: very_secure
-      FRONTEND_ORIGIN: http://localhost:3000
 
     services:
       mongo:
@@ -24,26 +17,26 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'" 
-          --health-interval=10s 
-          --health-timeout=5s 
+          --health-cmd="mongosh --eval 'db.adminCommand(\"ping\")'"
+          --health-interval=10s
+          --health-timeout=5s
           --health-retries=5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use Node.js 24
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 24
+          node-version: 20
 
       - name: Install dependencies
         run: npm install
 
-      - name: Start app
-        run: npm start &
-
       - name: Run tests
+        env:
+          MONGODB_URL: mongodb://localhost:27017/testdb
+          NODE_ENV: test
         run: npm test
 
