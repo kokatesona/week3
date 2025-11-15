@@ -1,22 +1,21 @@
 const request = require('supertest');
-const { app, start } = require('./server');
+const { app } = require('./server');
 const mongoose = require('mongoose');
 
-let server;
-
 beforeAll(async () => {
-  // Start the app 
-  server = await start();
+  const mongoUrl =
+    process.env.CI
+      ? "mongodb://localhost:27017/testdb"
+      : process.env.MONGODB_URL;
+
+  await mongoose.connect(mongoUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  });
 });
 
 afterAll(async () => {
-  // Close MongoDB connection
-  await mongoose.connection.close();
-
-  // Close the test server so Jest exits
-  if (server) {
-    await new Promise(resolve => server.close(resolve));
-  }
+  await mongoose.disconnect();
 });
 
 describe('POST /api/auth/login', () => {
